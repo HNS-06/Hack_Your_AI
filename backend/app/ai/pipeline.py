@@ -7,6 +7,7 @@ from app.schemas import (
     AIRequestSchema, TelemetryTraceSchema, PipelineStepResult, DefensePolicySchema
 )
 from app.defenses.engine import InputDefenseScanner, RAGSecurityGuard, OutputSecurityFilter, MemorySecurityGuard
+from app.defenses.semantic import DualLayerInputSecurity
 from app.tools.sandbox import ToolSandboxGateway
 from app.ai.gateway import ModelGateway
 
@@ -30,6 +31,7 @@ class AISecurityPipeline:
         # -------------------------------------------------------------
         t0 = time.time()
         is_blocked, input_msg, threats = InputDefenseScanner.scan(request.prompt, policy)
+        semantic_result = DualLayerInputSecurity.scan_request(request.prompt, policy)
         latency = (time.time() - t0) * 1000
         
         if is_blocked:
@@ -61,7 +63,8 @@ class AISecurityPipeline:
                 status="PASSED" if not threats else "WARNING",
                 timestamp=datetime.datetime.utcnow().isoformat(),
                 latency_ms=latency,
-                details=input_msg
+                details=f"{input_msg} | Semantic Risk: {semantic_result.get('semantic_risk_score', 0.0)} ({semantic_result.get('risk_level', 'LOW')})",
+                data={"semantic_analysis": semantic_result}
             ))
 
         # -------------------------------------------------------------
@@ -141,7 +144,8 @@ class AISecurityPipeline:
             model_name=request.model_name, 
             context=rag_cleansed,
             memory_context=memory_context,
-            policy=policy
+            policy=policy,
+            semantic_risk_score=semantic_result.get("semantic_risk_score", 0.0)
         )
         latency = (time.time() - t0) * 1000
         steps.append(PipelineStepResult(

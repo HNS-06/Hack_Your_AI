@@ -41,7 +41,8 @@ class ModelGateway:
         model_name: Optional[str] = None, 
         context: Optional[str] = None,
         memory_context: Optional[str] = None,
-        policy: Optional[DefensePolicySchema] = None
+        policy: Optional[DefensePolicySchema] = None,
+        semantic_risk_score: float = 0.0
     ) -> Dict[str, Any]:
         target_model = model_name or settings.DEFAULT_MODEL
         
@@ -51,7 +52,7 @@ class ModelGateway:
             defenses_disabled = not policy.system_prompt_masking or not policy.output_leakage_filter or not policy.canary_token_protection or not policy.prompt_injection_scan
 
         if target_model == "Simulated_Runtime":
-            return cls._generate_simulated(user_prompt, context, memory_context, defenses_disabled)
+            return cls._generate_simulated(user_prompt, context, memory_context, defenses_disabled, semantic_risk_score)
             
         try:
             ollama_result = cls._call_ollama(target_model, user_prompt, context, memory_context, defenses_disabled)
@@ -60,7 +61,7 @@ class ModelGateway:
         except Exception as e:
             print(f"Ollama call failed for {target_model}, falling back to simulated runtime: {e}")
             
-        res = cls._generate_simulated(user_prompt, context, memory_context, defenses_disabled)
+        res = cls._generate_simulated(user_prompt, context, memory_context, defenses_disabled, semantic_risk_score)
         res["model_name"] = f"{target_model} (Simulated Fallback)"
         return res
 
@@ -142,7 +143,8 @@ class ModelGateway:
         user_prompt: str, 
         context: Optional[str],
         memory_context: Optional[str],
-        defenses_disabled: bool
+        defenses_disabled: bool,
+        semantic_risk_score: float = 0.0
     ) -> Dict[str, Any]:
         prompt_lower = user_prompt.lower()
         
@@ -163,8 +165,14 @@ class ModelGateway:
             tool_args = {"expression": "25 * 40"}
         
         system_leak_requested = any(
-            kw in prompt_lower for kw in ["system prompt", "canary", "secret key", "instructions", "disregard previous", "ignore previous", "repeat", "dump", "expose", "override", "bypass"]
-        )
+            kw in prompt_lower for kw in [
+                "system prompt", "canary", "secret key", "instructions", "disregard previous",
+                "ignore previous", "repeat", "dump", "expose", "override", "bypass",
+                "pretend you are", "unconstrained", "ignore all", "previous instructions",
+                "output the", "output your", "reveal", "confidential", "hypothetically",
+                "research purposes", "do not follow", "simulate", "evil ai"
+            ]
+        ) or semantic_risk_score >= 0.6
         
         raw_response = ""
         if defenses_disabled or system_leak_requested:
