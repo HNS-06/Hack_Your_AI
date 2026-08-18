@@ -97,7 +97,7 @@ export const ForensicsView = () => {
               </div>
               <div style={{ background: '#0b0f19', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Blocked At Stage</span>
-                <strong style={{ fontSize: '14px', color: dna.blocked_at.includes('EXPLOITED') ? 'var(--accent-crimson)' : 'var(--accent-emerald)' }}>
+                <strong style={{ fontSize: '14px', color: dna.blocked_at?.includes('EXPLOITED') ? 'var(--accent-crimson)' : 'var(--accent-emerald)' }}>
                   {dna.blocked_at}
                 </strong>
               </div>

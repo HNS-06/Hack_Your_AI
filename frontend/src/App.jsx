@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header, Navigation } from './components/Header';
 import { LivePipelineView } from './views/LivePipelineView';
-import { RedTeamView } from './views/RedTeamView';
 import { BlueTeamView } from './views/BlueTeamView';
 import { ScannerView } from './views/ScannerView';
 import { ReplayView, SandboxView, ReportsView } from './views/ReplayView';

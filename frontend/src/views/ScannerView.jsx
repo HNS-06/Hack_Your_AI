@@ -66,7 +66,7 @@ export const ScannerView = ({ policy }) => {
           <div className="glass-panel" style={{ padding: '24px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>VULNERABILITY VECTOR SCORES</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-              {Object.entries(report.vector_scores).map(([vec, score]) => (
+              {report.vector_scores && Object.entries(report.vector_scores).map(([vec, score]) => (
                 <div key={vec}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#fff' }}>
                     <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{vec.replace('_', ' ')}</span>

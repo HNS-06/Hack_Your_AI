@@ -181,7 +181,7 @@ export const LivePipelineView = ({ policy, selectedModel }) => {
 
             <div className="telemetry-code" style={{ flex: 1, overflowY: 'auto' }}>
               {latestTrace.steps.map((step, idx) => (
-                <div key={idx} style={{ marginBottom: '12px', borderBottom: '1px border #1e293b', paddingBottom: '8px' }}>
+                <div key={idx} style={{ marginBottom: '12px', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: step.status === 'BLOCKED' ? '#ef4444' : '#10b981', fontWeight: 600 }}>
                     <span>[{step.step}]</span>
                     <span>{step.status} ({step.latency_ms.toFixed(1)}ms)</span>
